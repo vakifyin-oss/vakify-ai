@@ -36,7 +36,7 @@ export default function LoginPage() {
       <div className="auth-noise" aria-hidden="true" />
       <div className="auth-grid">
         <section className="auth-panel">
-          <p className="page-kicker text-white-50 mb-2">AI Adaptive Platform</p>
+          <p className="page-kicker text-white-50 mb-2">Vakify.Ai</p>
           <h2 className="mb-2">Learn Your Way</h2>
           <p className="mb-0 text-white-50">
             Personalized chatbot, learning-style detection, and synced Java practice in one workflow.

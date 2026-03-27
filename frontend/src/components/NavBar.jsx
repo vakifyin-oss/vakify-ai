@@ -14,8 +14,8 @@ export default function NavBar() {
     <nav className="navbar navbar-expand-lg app-nav mb-4">
       <div className="container">
         <Link className="navbar-brand d-flex align-items-center gap-2" to="/dashboard">
-          <span className="brand-mark">AL</span>
-          <span className="brand-name">Adaptive Learning</span>
+          <span className="brand-mark">VA</span>
+          <span className="brand-name">Vakify.Ai</span>
         </Link>
 
         <div className="navbar-nav ms-auto gap-2 align-items-center">

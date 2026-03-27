@@ -15,7 +15,7 @@ export default function LandingPage() {
       <div className="auth-noise" aria-hidden="true" />
       <div className="auth-grid">
         <section className="auth-panel">
-          <p className="page-kicker text-white-50 mb-2">Adaptive AI Learning Platform</p>
+          <p className="page-kicker text-white-50 mb-2">Vakify.Ai</p>
           <h1 className="mb-2">One Platform. Three Learning Styles. Infinite Progress.</h1>
           <p className="mb-3 text-white-50">
             Analyze learner style, explain concepts with AI, assign synced tasks, and track outcomes in one workspace.
