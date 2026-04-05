@@ -35,11 +35,17 @@ services:
       - key: NVIDIA_IMAGE_API_KEY
         sync: false
       - key: NVIDIA_IMAGE_URL
-        value: https://ai.api.nvidia.com/v1/genai/black-forest-labs/flux.2-klein-4b
+        value: https://ai.api.nvidia.com/v1/genai/stabilityai/stable-diffusion-3-medium
+      - key: NVIDIA_IMAGE_CFG_SCALE
+        value: "5"
+      - key: NVIDIA_IMAGE_ASPECT_RATIO
+        sync: false
       - key: NVIDIA_IMAGE_STEPS
-        value: "4"
+        value: "50"
       - key: NVIDIA_IMAGE_SEED
         value: "0"
+      - key: NVIDIA_IMAGE_NEGATIVE_PROMPT
+        sync: false
       - key: ELEVENLABS_API_KEY
         sync: false
       - key: ELEVENLABS_VOICE_ID

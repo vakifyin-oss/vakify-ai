@@ -3,6 +3,7 @@ import os
 import re
 from typing import Any
 from pathlib import Path
+from math import gcd
 
 import requests
 
@@ -11,7 +12,7 @@ OPENAI_CHAT_COMPLETIONS_URL = "https://api.openai.com/v1/chat/completions"
 OPENAI_SPEECH_URL = "https://api.openai.com/v1/audio/speech"
 OPENAI_IMAGE_URL = "https://api.openai.com/v1/images/generations"
 ELEVENLABS_BASE_URL = "https://api.elevenlabs.io/v1/text-to-speech"
-NVIDIA_IMAGE_URL = "https://ai.api.nvidia.com/v1/genai/black-forest-labs/flux.2-klein-4b"
+NVIDIA_IMAGE_URL = "https://ai.api.nvidia.com/v1/genai/stabilityai/stable-diffusion-3-medium"
 
 
 def _extract_text(payload: dict[str, Any]) -> str:
@@ -199,6 +200,8 @@ def generate_image_data_url(prompt: str, size: str = "1024x1024") -> str | None:
             w_raw, h_raw = size.lower().split("x", 1)
             width = max(256, min(1568, int(w_raw)))
             height = max(256, min(1568, int(h_raw)))
+        ratio_gcd = gcd(width, height) or 1
+        aspect_ratio = f"{width // ratio_gcd}:{height // ratio_gcd}"
 
         response = requests.post(
             nvidia_url,
@@ -209,10 +212,11 @@ def generate_image_data_url(prompt: str, size: str = "1024x1024") -> str | None:
             },
             json={
                 "prompt": prompt[:3200],
-                "width": width,
-                "height": height,
+                "cfg_scale": float(os.getenv("NVIDIA_IMAGE_CFG_SCALE", "5")),
+                "aspect_ratio": os.getenv("NVIDIA_IMAGE_ASPECT_RATIO", aspect_ratio).strip() or aspect_ratio,
                 "seed": int(os.getenv("NVIDIA_IMAGE_SEED", "0")),
-                "steps": int(os.getenv("NVIDIA_IMAGE_STEPS", "4")),
+                "steps": int(os.getenv("NVIDIA_IMAGE_STEPS", "50")),
+                "negative_prompt": os.getenv("NVIDIA_IMAGE_NEGATIVE_PROMPT", ""),
             },
             timeout=35,
         )
