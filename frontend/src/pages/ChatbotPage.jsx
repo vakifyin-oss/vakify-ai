@@ -540,27 +540,18 @@ export default function ChatbotPage() {
                   <div className="asset-panel">
                     <h6 className="mb-2">Learning-Style Assets</h6>
                     {response.response_type === "visual" && (
-                      <div className={`alert py-2 ${response.assets.visual_status === "ai_image_generated" ? "alert-success" : "alert-warning"}`}>
-                        {response.assets.visual_status === "ai_image_generated"
-                          ? "AI visual generated successfully."
-                          : "AI image unavailable, fallback visual charts generated."}
-                      </div>
+                      <>
+                        {response.assets.ai_image_url ? (
+                          <div className="alert py-2 alert-success">AI visual generated successfully.</div>
+                        ) : (
+                          <div className="alert py-2 alert-warning">AI visual is unavailable for this response.</div>
+                        )}
+                      </>
                     )}
-                    {response.assets.diagram && <p className="mb-2"><strong>Flow:</strong> {response.assets.diagram}</p>}
                     {response.assets.ai_image_url && (
                       <a href={response.assets.ai_image_url} target="_blank" rel="noreferrer">
                         <img src={response.assets.ai_image_url} alt="ai generated learning visual" className="asset-image asset-image-hero mb-2" />
                       </a>
-                    )}
-                    {response.assets.video_url && <p className="mb-2"><a href={response.assets.video_url} target="_blank" rel="noreferrer">Open Video Explanation</a></p>}
-                    {Array.isArray(response.assets.visual_gallery) && response.assets.visual_gallery.length > 0 && (
-                      <div className="visual-gallery mb-2">
-                        {response.assets.visual_gallery.filter(Boolean).map((img, idx) => (
-                          <a key={`v-${idx}`} href={img} target="_blank" rel="noreferrer">
-                            <img src={img} alt={`visual-${idx + 1}`} className="asset-image" />
-                          </a>
-                        ))}
-                      </div>
                     )}
                     {response.assets.audio_script && <pre className="chat-text mb-2">{response.assets.audio_script}</pre>}
                     {audioSrc && (
