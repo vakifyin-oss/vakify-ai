@@ -23,11 +23,11 @@ Adaptive AI learning platform with personalized delivery by learning style (Visu
 ### Backend
 ```bash
 cd backend
-python3 -m venv .venv
-source .venv/bin/activate
+python -m venv .venv
+.venv\Scripts\Activate.ps1
 pip install -r requirements.txt
-cp .env.example .env
-python3 run.py
+copy .env.example .env
+python run.py
 ```
 Backend: `http://127.0.0.1:5001`
 
@@ -35,7 +35,7 @@ Backend: `http://127.0.0.1:5001`
 ```bash
 cd frontend
 npm install
-cp .env.example .env
+copy .env.example .env
 npm run dev
 ```
 Frontend: `http://127.0.0.1:5173` (or next available port)
