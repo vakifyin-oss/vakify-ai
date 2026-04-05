@@ -333,6 +333,15 @@ a {
   letter-spacing: 0.2px;
 }
 
+.auth-form-logo {
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  display: block;
+  box-shadow: 0 12px 28px rgba(37, 85, 214, 0.24);
+  flex: 0 0 auto;
+}
+
 .auth-field > span {
   display: block;
   font-size: 0.85rem;

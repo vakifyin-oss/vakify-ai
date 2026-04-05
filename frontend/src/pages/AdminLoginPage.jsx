@@ -47,7 +47,7 @@ export default function AdminLoginPage() {
 
         <section className="glass-card auth-form auth-form-v2">
           <div className="auth-form-head">
-            <div className="auth-form-mark">AL</div>
+            <img className="auth-form-logo" src="/vakify-logo.svg" alt="Vakify logo" />
             <div>
               <h3 className="mb-1">Admin Login</h3>
               <p className="text-muted mb-0">Only emails in ADMIN_EMAILS are allowed.</p>

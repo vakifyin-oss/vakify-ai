@@ -46,7 +46,7 @@ export default function RegisterPage() {
 
         <section className="glass-card auth-form auth-form-v2">
           <div className="auth-form-head">
-            <div className="auth-form-mark">AL</div>
+            <img className="auth-form-logo" src="/vakify-logo.svg" alt="Vakify logo" />
             <div>
               <h3 className="mb-1">Create Account</h3>
               <p className="text-muted mb-0">Start your adaptive learning setup.</p>
