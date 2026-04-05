@@ -11,6 +11,7 @@ const QUICK_PROMPTS = [
 ];
 
 const CHAT_LATEST_RESPONSE_KEY = "chatLatestRichResponse";
+const CHAT_ASSET_CACHE_KEY = "chatAssetCacheById";
 const EXT_BY_TYPE = {
   video: ".txt",
   audio: ".mp3",
@@ -58,6 +59,24 @@ export default function ChatbotPage() {
   const [feedbackComment, setFeedbackComment] = useState("");
   const [feedbackMsg, setFeedbackMsg] = useState("");
   const [selectedHistoryId, setSelectedHistoryId] = useState(null);
+
+  const readAssetCache = () => {
+    try {
+      const raw = localStorage.getItem(CHAT_ASSET_CACHE_KEY);
+      const parsed = raw ? JSON.parse(raw) : {};
+      return parsed && typeof parsed === "object" ? parsed : {};
+    } catch {
+      return {};
+    }
+  };
+
+  const writeAssetCache = (cacheObj) => {
+    try {
+      localStorage.setItem(CHAT_ASSET_CACHE_KEY, JSON.stringify(cacheObj || {}));
+    } catch {
+      // ignore storage quota errors
+    }
+  };
 
   const selectedChat = useMemo(
     () => history.find((h) => h.chat_id === selectedHistoryId) || null,
@@ -142,9 +161,9 @@ export default function ChatbotPage() {
 
   const refreshHistory = async () => {
     const latest = await api.get("/chat/history");
-    const rows = latest.data || [];
-    setHistory(rows);
-    return rows;
+      const rows = latest.data || [];
+      setHistory(rows);
+      return rows;
   };
 
   const deleteChatItem = async (chatId) => {
@@ -181,6 +200,16 @@ export default function ChatbotPage() {
       setFeedbackMsg("");
       setAutoPack(res.data.auto_resources || []);
       localStorage.setItem(CHAT_LATEST_RESPONSE_KEY, JSON.stringify(richResponse));
+      if (richResponse?.chat_id && richResponse?.assets) {
+        const cache = readAssetCache();
+        cache[String(richResponse.chat_id)] = {
+          assets: richResponse.assets,
+          response_type: richResponse.response_type,
+          askedQuestion: asked,
+          text: richResponse.text,
+        };
+        writeAssetCache(cache);
+      }
       await loadPrompts(asked, mode);
 
       if (audioSrc) {
@@ -345,7 +374,19 @@ export default function ChatbotPage() {
 
   const focusHistoryMessage = (chatId, questionText = "", responseStyle = "") => {
     setSelectedHistoryId(chatId);
-    setResponse(null);
+    const cache = readAssetCache();
+    const cached = cache[String(chatId)];
+    if (cached?.assets) {
+      setResponse({
+        chat_id: chatId,
+        askedQuestion: cached.askedQuestion || questionText || "",
+        text: cached.text || "",
+        response_type: cached.response_type || responseStyle || "visual",
+        assets: cached.assets,
+      });
+    } else {
+      setResponse(null);
+    }
     setAutoPack([]);
     setFeedbackComment("");
     setFeedbackMsg("");
