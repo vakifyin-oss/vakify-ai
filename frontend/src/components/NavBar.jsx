@@ -14,7 +14,7 @@ export default function NavBar() {
     <nav className="navbar navbar-expand-lg app-nav mb-4">
       <div className="container">
         <Link className="navbar-brand d-flex align-items-center gap-2" to="/dashboard">
-          <span className="brand-mark">VA</span>
+          <img className="brand-logo" src="/vakify-logo.svg" alt="Vakify logo" />
           <span className="brand-name">Vakify.Ai</span>
         </Link>
 

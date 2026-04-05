@@ -44,17 +44,12 @@ a {
   border-bottom: 1px solid var(--line);
 }
 
-.brand-mark {
+.brand-logo {
   width: 34px;
   height: 34px;
+  display: block;
   border-radius: 10px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  background: linear-gradient(135deg, #4d6bff, #9a27f0);
-  color: #fff;
-  font-weight: 700;
-  font-size: 0.9rem;
+  box-shadow: 0 6px 18px rgba(15, 93, 255, 0.28);
 }
 
 .brand-name {

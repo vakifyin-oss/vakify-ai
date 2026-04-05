@@ -1,0 +1,24 @@
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="64" y1="64" x2="448" y2="448" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#0F5DFF"/>
+      <stop offset="1" stop-color="#0CC3B0"/>
+    </linearGradient>
+    <linearGradient id="vcut" x1="145" y1="118" x2="256" y2="364" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#FFFFFF"/>
+      <stop offset="1" stop-color="#E8F1FF"/>
+    </linearGradient>
+    <linearGradient id="aspark" x1="262" y1="181" x2="396" y2="346" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#FFFFFF"/>
+      <stop offset="1" stop-color="#D4FFF8"/>
+    </linearGradient>
+  </defs>
+
+  <rect x="44" y="44" width="424" height="424" rx="120" fill="url(#bg)"/>
+
+  <path d="M130 132L222 382H286L378 132H314L254 309L194 132H130Z" fill="url(#vcut)"/>
+
+  <path d="M302 212L252 332H292L302 307H360L370 332H410L360 212H302ZM331 244L349 282H313L331 244Z" fill="url(#aspark)"/>
+
+  <circle cx="384" cy="130" r="18" fill="#FFFFFF" fill-opacity="0.84"/>
+</svg>
