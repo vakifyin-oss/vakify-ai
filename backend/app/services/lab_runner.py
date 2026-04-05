@@ -127,25 +127,40 @@ def _simulate_java_result(source_code: str, reason: str) -> dict:
     }
 
 
-def _valid_judge0_creds(base_url: str, api_key: str, api_host: str) -> bool:
+def _valid_remote_runner_creds(base_url: str, api_key: str, api_host: str) -> bool:
     if not base_url or not api_key or not api_host:
         return False
     placeholder_tokens = {"your-rapidapi-key", "changeme", "none", "null"}
     return api_key.strip().lower() not in placeholder_tokens
 
 
-def run_java_code(source_code: str) -> dict:
-    base_url = os.getenv("JUDGE0_BASE_URL", "").strip().rstrip("/")
-    api_key = os.getenv("JUDGE0_API_KEY", "").strip()
-    api_host = os.getenv("JUDGE0_API_HOST", "").strip()
+def _load_runner_config() -> tuple[str, str, str]:
+    # Preferred config for RapidAPI CodeArena/Judge endpoints.
+    base_url = os.getenv("CODEARENA_BASE_URL", "").strip().rstrip("/")
+    api_key = os.getenv("CODEARENA_API_KEY", "").strip()
+    api_host = os.getenv("CODEARENA_API_HOST", "").strip()
 
-    if not _valid_judge0_creds(base_url, api_key, api_host):
+    # Backward-compatible fallback for previous env names.
+    if not base_url:
+        base_url = os.getenv("JUDGE0_BASE_URL", "").strip().rstrip("/")
+    if not api_key:
+        api_key = os.getenv("JUDGE0_API_KEY", "").strip()
+    if not api_host:
+        api_host = os.getenv("JUDGE0_API_HOST", "").strip()
+
+    return base_url, api_key, api_host
+
+
+def run_java_code(source_code: str) -> dict:
+    base_url, api_key, api_host = _load_runner_config()
+
+    if not _valid_remote_runner_creds(base_url, api_key, api_host):
         local_result = _run_java_locally(source_code)
         if local_result:
             return local_result
         return _simulate_java_result(
             source_code,
-            "Judge0 credentials missing. Local Java not available, switched to simulated execution.",
+            "Remote runner credentials missing. Local Java not available, switched to simulated execution.",
         )
 
     headers = {
@@ -172,25 +187,25 @@ def run_java_code(source_code: str) -> dict:
             "stdout": payload.get("stdout") or "",
             "stderr": payload.get("stderr") or payload.get("compile_output") or "",
             "judge0_status": (payload.get("status") or {}).get("description", "unknown"),
-            "runner": "judge0",
+            "runner": "remote-runner",
             "note": "",
         }
     except requests.HTTPError as exc:
         status = exc.response.status_code if exc.response is not None else "unknown"
         local_result = _run_java_locally(source_code)
         if local_result:
-            local_result["note"] = f"Judge0 HTTP error ({status}). Switched to local Java execution."
+            local_result["note"] = f"Remote runner HTTP error ({status}). Switched to local Java execution."
             return local_result
         return _simulate_java_result(
             source_code,
-            f"Judge0 HTTP error ({status}). Switched to simulated execution.",
+            f"Remote runner HTTP error ({status}). Switched to simulated execution.",
         )
     except requests.RequestException:
         local_result = _run_java_locally(source_code)
         if local_result:
-            local_result["note"] = "Judge0 network error. Switched to local Java execution."
+            local_result["note"] = "Remote runner network error. Switched to local Java execution."
             return local_result
         return _simulate_java_result(
             source_code,
-            "Judge0 network error. Switched to simulated execution.",
+            "Remote runner network error. Switched to simulated execution.",
         )
