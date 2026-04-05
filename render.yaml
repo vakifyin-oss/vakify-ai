@@ -32,6 +32,14 @@ services:
         value: gpt-4o-mini-tts
       - key: OPENAI_TTS_VOICE
         value: alloy
+      - key: NVIDIA_IMAGE_API_KEY
+        sync: false
+      - key: NVIDIA_IMAGE_URL
+        value: https://ai.api.nvidia.com/v1/genai/black-forest-labs/flux.2-klein-4b
+      - key: NVIDIA_IMAGE_STEPS
+        value: "4"
+      - key: NVIDIA_IMAGE_SEED
+        value: "0"
       - key: ELEVENLABS_API_KEY
         sync: false
       - key: ELEVENLABS_VOICE_ID

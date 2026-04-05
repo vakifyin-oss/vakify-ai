@@ -11,6 +11,7 @@ OPENAI_CHAT_COMPLETIONS_URL = "https://api.openai.com/v1/chat/completions"
 OPENAI_SPEECH_URL = "https://api.openai.com/v1/audio/speech"
 OPENAI_IMAGE_URL = "https://api.openai.com/v1/images/generations"
 ELEVENLABS_BASE_URL = "https://api.elevenlabs.io/v1/text-to-speech"
+NVIDIA_IMAGE_URL = "https://ai.api.nvidia.com/v1/genai/black-forest-labs/flux.2-klein-4b"
 
 
 def _extract_text(payload: dict[str, Any]) -> str:
@@ -183,8 +184,66 @@ def generate_tts_mp3(text: str, output_path: str) -> bool:
 
 
 def generate_image_data_url(prompt: str, size: str = "1024x1024") -> str | None:
+    if not prompt.strip():
+        return None
+
+    # Prefer NVIDIA image generation when configured to reduce OpenAI image-token cost.
+    nvidia_key = os.getenv("NVIDIA_IMAGE_API_KEY", "").strip()
+    nvidia_url = os.getenv("NVIDIA_IMAGE_URL", NVIDIA_IMAGE_URL).strip()
+    if nvidia_key and nvidia_url:
+        try:
+            width = 1024
+            height = 1024
+            if "x" in size:
+                w_raw, h_raw = size.lower().split("x", 1)
+                width = max(256, min(1568, int(w_raw)))
+                height = max(256, min(1568, int(h_raw)))
+
+            response = requests.post(
+                nvidia_url,
+                headers={
+                    "Authorization": f"Bearer {nvidia_key}",
+                    "Accept": "application/json",
+                    "Content-Type": "application/json",
+                },
+                json={
+                    "prompt": prompt[:3200],
+                    "width": width,
+                    "height": height,
+                    "seed": int(os.getenv("NVIDIA_IMAGE_SEED", "0")),
+                    "steps": int(os.getenv("NVIDIA_IMAGE_STEPS", "4")),
+                },
+                timeout=35,
+            )
+            response.raise_for_status()
+            payload = response.json()
+
+            artifacts = payload.get("artifacts") or []
+            if artifacts and isinstance(artifacts[0], dict):
+                b64 = artifacts[0].get("base64")
+                if b64:
+                    return f"data:image/png;base64,{b64}"
+
+            data = payload.get("data") or []
+            if data and isinstance(data[0], dict):
+                b64 = data[0].get("b64_json")
+                if b64:
+                    return f"data:image/png;base64,{b64}"
+                url = data[0].get("url")
+                if url:
+                    return str(url)
+
+            if payload.get("image"):
+                image_value = str(payload["image"])
+                if image_value.startswith("data:image/"):
+                    return image_value
+                return f"data:image/png;base64,{image_value}"
+        except Exception:
+            # Fall back to OpenAI image generation when NVIDIA is unavailable.
+            pass
+
     api_key = os.getenv("OPENAI_API_KEY", "").strip()
-    if not api_key or not prompt.strip():
+    if not api_key:
         return None
 
     configured = os.getenv("OPENAI_IMAGE_MODEL", "gpt-image-1").strip()
