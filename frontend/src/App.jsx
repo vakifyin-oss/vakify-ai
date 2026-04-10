@@ -2,15 +2,10 @@ import { Route, Routes, Navigate } from "react-router-dom";
 import ProtectedRoute from "./components/ProtectedRoute";
 import ClerkAuthBar from "./components/ClerkAuthBar";
 import LandingPage from "./pages/LandingPage";
-import RegisterPage from "./pages/RegisterPage";
-import LoginPage from "./pages/LoginPage";
-import AdminLoginPage from "./pages/AdminLoginPage";
-import ResetPasswordPage from "./pages/ResetPasswordPage";
 import DashboardPage from "./pages/DashboardPage";
 import LearningStylePage from "./pages/LearningStylePage";
 import ChatbotPage from "./pages/ChatbotPage";
 import PracticePage from "./pages/PracticePage";
-import AdminPage from "./pages/AdminPage";
 
 export default function App() {
   return (
@@ -18,11 +13,11 @@ export default function App() {
       <ClerkAuthBar />
       <Routes>
         <Route path="/" element={<LandingPage />} />
-        <Route path="/register" element={<RegisterPage />} />
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/user-login" element={<LoginPage />} />
-        <Route path="/admin-login" element={<AdminLoginPage />} />
-        <Route path="/reset-password" element={<ResetPasswordPage />} />
+        <Route path="/register" element={<Navigate to="/" replace />} />
+        <Route path="/login" element={<Navigate to="/" replace />} />
+        <Route path="/user-login" element={<Navigate to="/" replace />} />
+        <Route path="/admin-login" element={<Navigate to="/" replace />} />
+        <Route path="/reset-password" element={<Navigate to="/" replace />} />
 
         <Route
           path="/style"
@@ -56,16 +51,9 @@ export default function App() {
             </ProtectedRoute>
           }
         />
-        <Route
-          path="/admin"
-          element={
-            <ProtectedRoute adminOnly>
-              <AdminPage />
-            </ProtectedRoute>
-          }
-        />
+        <Route path="/admin" element={<Navigate to="/dashboard" replace />} />
 
-        <Route path="*" element={<Navigate to="/login" replace />} />
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </div>
   );

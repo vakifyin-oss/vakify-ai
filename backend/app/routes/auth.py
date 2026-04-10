@@ -1,4 +1,5 @@
 from datetime import datetime
+import secrets
 from flask import Blueprint, request, jsonify
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
@@ -31,6 +32,46 @@ def register():
     db.session.commit()
 
     return jsonify({"message": "registered successfully"}), 201
+
+
+@auth_bp.post("/clerk-login")
+def clerk_login():
+    data = request.get_json() or {}
+    clerk_user_id = str(data.get("clerk_user_id", "")).strip()
+    email = str(data.get("email", "")).strip().lower()
+    name = str(data.get("name", "")).strip() or "Learner"
+
+    if not clerk_user_id or not email:
+        return jsonify({"error": "clerk_user_id and email are required"}), 400
+
+    user = User.query.filter_by(email=email).first()
+    if not user:
+        user = User(
+            name=name,
+            email=email,
+            # Stored only to satisfy legacy non-null schema while Clerk handles auth.
+            password_hash=generate_password_hash(secrets.token_urlsafe(32)),
+        )
+        db.session.add(user)
+        db.session.commit()
+    else:
+        if name and user.name != name:
+            user.name = name
+            db.session.commit()
+
+    token = create_access_token(identity=str(user.user_id))
+    return jsonify(
+        {
+            "access_token": token,
+            "user": {
+                "user_id": user.user_id,
+                "name": user.name,
+                "email": user.email,
+                "is_admin": is_admin_email(user.email),
+                "clerk_user_id": clerk_user_id,
+            },
+        }
+    )
 
 
 @auth_bp.post("/login")

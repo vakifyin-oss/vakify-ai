@@ -1,53 +1,60 @@
 import { createContext, useContext, useEffect, useState } from "react";
+import { useClerk, useUser } from "@clerk/react";
 import api from "../services/api";
 
 const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
+  const { isLoaded, isSignedIn, user: clerkUser } = useUser();
+  const { signOut } = useClerk();
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const token = localStorage.getItem("token");
-    if (!token) {
-      setLoading(false);
-      return;
-    }
+    const syncWithBackend = async () => {
+      if (!isLoaded) return;
 
-    api
-      .get("/auth/me")
-      .then((res) => setUser({ ...res.data, is_admin: !!res.data?.is_admin }))
-      .catch(() => {
+      if (!isSignedIn || !clerkUser) {
         localStorage.removeItem("token");
         setUser(null);
-      })
-      .finally(() => setLoading(false));
-  }, []);
+        setLoading(false);
+        return;
+      }
 
-  const login = async (email, password, mode = "user") => {
-    const endpoint =
-      mode === "admin" ? "/auth/login-admin" : mode === "any" ? "/auth/login" : "/auth/login-user";
-    const res = await api.post(endpoint, { email, password });
-    localStorage.setItem("token", res.data.access_token);
-    setUser({ ...res.data.user, is_admin: !!res.data.user?.is_admin });
-  };
+      const email = clerkUser.primaryEmailAddress?.emailAddress || clerkUser.emailAddresses?.[0]?.emailAddress;
+      if (!email) {
+        setUser(null);
+        setLoading(false);
+        return;
+      }
 
-  const register = async (name, email, password) => {
-    await api.post("/auth/register", { name, email, password });
-  };
+      try {
+        const bridge = await api.post("/auth/clerk-login", {
+          clerk_user_id: clerkUser.id,
+          email,
+          name: clerkUser.fullName || clerkUser.firstName || "Learner",
+        });
+        localStorage.setItem("token", bridge.data.access_token);
+        setUser({ ...bridge.data.user, is_admin: !!bridge.data.user?.is_admin });
+      } catch {
+        localStorage.removeItem("token");
+        setUser(null);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    syncWithBackend();
+  }, [isLoaded, isSignedIn, clerkUser]);
 
   const logout = async () => {
-    try {
-      await api.post("/auth/logout");
-    } catch {
-      // no-op
-    }
     localStorage.removeItem("token");
     setUser(null);
+    await signOut();
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, register, logout }}>
+    <AuthContext.Provider value={{ user, loading, logout }}>
       {children}
     </AuthContext.Provider>
   );

@@ -32,6 +32,8 @@ services:
         value: gpt-4o-mini-tts
       - key: OPENAI_TTS_VOICE
         value: alloy
+      - key: CLERK_SECRET_KEY
+        sync: false
       - key: NVIDIA_IMAGE_API_KEY
         sync: false
       - key: NVIDIA_IMAGE_URL

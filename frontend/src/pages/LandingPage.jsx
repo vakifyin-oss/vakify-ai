@@ -1,5 +1,4 @@
 import { useEffect } from "react";
-import { Link } from "react-router-dom";
 import { Show, SignInButton, SignUpButton, UserButton } from "@clerk/react";
 import ParticlesBackdrop from "../components/ParticlesBackdrop";
 
@@ -51,7 +50,6 @@ export default function LandingPage() {
                 <UserButton />
               </div>
             </Show>
-            <Link to="/user-login" className="btn surface-btn">Legacy Login</Link>
           </div>
         </section>
       </div>

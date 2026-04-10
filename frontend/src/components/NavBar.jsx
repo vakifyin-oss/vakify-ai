@@ -2,12 +2,12 @@ import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 
 export default function NavBar() {
-  const { logout, user } = useAuth();
+  const { logout } = useAuth();
   const navigate = useNavigate();
 
   const onLogout = async () => {
     await logout();
-    navigate("/user-login");
+    navigate("/");
   };
 
   return (
@@ -22,7 +22,6 @@ export default function NavBar() {
           <Link className="nav-link nav-pill" to="/dashboard">Dashboard</Link>
           <Link className="nav-link nav-pill" to="/chat">AI Chat</Link>
           <Link className="nav-link nav-pill" to="/practice">Practice</Link>
-          {user?.is_admin && <Link className="nav-link nav-pill" to="/admin">Admin</Link>}
           <button className="btn btn-sm surface-btn" onClick={onLogout}>Logout</button>
         </div>
       </div>
