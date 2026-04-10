@@ -1,9 +1,10 @@
 import { useEffect } from "react";
-import { Show, SignInButton, useUser } from "@clerk/react";
+import { Show, SignInButton, useClerk, useUser } from "@clerk/react";
 import { useNavigate } from "react-router-dom";
 import ParticlesBackdrop from "../components/ParticlesBackdrop";
 
 export default function LandingPage() {
+  const { openSignIn } = useClerk();
   const { isLoaded, isSignedIn } = useUser();
   const navigate = useNavigate();
 
@@ -17,6 +18,12 @@ export default function LandingPage() {
       navigate("/dashboard", { replace: true });
     }
   }, [isLoaded, isSignedIn, navigate]);
+
+  useEffect(() => {
+    if (isLoaded && !isSignedIn) {
+      openSignIn();
+    }
+  }, [isLoaded, isSignedIn, openSignIn]);
 
   return (
     <div className="auth-shell auth-shell-v3">
@@ -42,7 +49,7 @@ export default function LandingPage() {
             <img className="auth-form-logo" src="/vakify-logo.svg" alt="Vakify logo" />
             <div>
               <h3 className="mb-1">Continue to Vakify.Ai</h3>
-              <p className="text-muted mb-0">Sign in popup opens here. New users can create account inside the same popup.</p>
+              <p className="text-muted mb-0">Login opens directly. New users can create an account inside the same popup.</p>
             </div>
           </div>
           <div className="d-grid gap-2">
