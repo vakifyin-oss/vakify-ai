@@ -1,5 +1,6 @@
 import { Route, Routes, Navigate } from "react-router-dom";
 import ProtectedRoute from "./components/ProtectedRoute";
+import ClerkAuthBar from "./components/ClerkAuthBar";
 import LandingPage from "./pages/LandingPage";
 import RegisterPage from "./pages/RegisterPage";
 import LoginPage from "./pages/LoginPage";
@@ -14,6 +15,7 @@ import AdminPage from "./pages/AdminPage";
 export default function App() {
   return (
     <div className="main-shell">
+      <ClerkAuthBar />
       <Routes>
         <Route path="/" element={<LandingPage />} />
         <Route path="/register" element={<RegisterPage />} />
