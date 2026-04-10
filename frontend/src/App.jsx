@@ -1,28 +1,60 @@
-import "./App.css";
-import { Show, SignInButton, SignUpButton, UserButton } from "@clerk/react";
+import { Route, Routes, Navigate } from "react-router-dom";
+import ProtectedRoute from "./components/ProtectedRoute";
+import ClerkAuthBar from "./components/ClerkAuthBar";
+import LandingPage from "./pages/LandingPage";
+import DashboardPage from "./pages/DashboardPage";
+import LearningStylePage from "./pages/LearningStylePage";
+import ChatbotPage from "./pages/ChatbotPage";
+import PracticePage from "./pages/PracticePage";
 
-function App() {
+export default function App() {
   return (
-    <main className="app-shell">
-      <h1>Vakify.Ai</h1>
-      <p>Clerk authentication is now active.</p>
+    <div className="main-shell">
+      <ClerkAuthBar />
+      <Routes>
+        <Route path="/" element={<LandingPage />} />
+        <Route path="/register" element={<Navigate to="/" replace />} />
+        <Route path="/login" element={<Navigate to="/" replace />} />
+        <Route path="/user-login" element={<Navigate to="/" replace />} />
+        <Route path="/admin-login" element={<Navigate to="/" replace />} />
+        <Route path="/reset-password" element={<Navigate to="/" replace />} />
 
-      <header className="auth-actions">
-        <Show when="signed-out">
-          <SignInButton mode="modal">
-            <button type="button">Sign In</button>
-          </SignInButton>
-          <SignUpButton mode="modal">
-            <button type="button">Sign Up</button>
-          </SignUpButton>
-        </Show>
+        <Route
+          path="/style"
+          element={
+            <ProtectedRoute userOnly>
+              <LearningStylePage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/dashboard"
+          element={
+            <ProtectedRoute userOnly>
+              <DashboardPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/chat"
+          element={
+            <ProtectedRoute userOnly>
+              <ChatbotPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/practice"
+          element={
+            <ProtectedRoute userOnly>
+              <PracticePage />
+            </ProtectedRoute>
+          }
+        />
+        <Route path="/admin" element={<Navigate to="/dashboard" replace />} />
 
-        <Show when="signed-in">
-          <UserButton />
-        </Show>
-      </header>
-    </main>
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    </div>
   );
 }
-
-export default App;
