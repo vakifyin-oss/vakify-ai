@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import { Link } from "react-router-dom";
+import { Show, SignInButton, SignUpButton, UserButton } from "@clerk/react";
 import ParticlesBackdrop from "../components/ParticlesBackdrop";
 
 export default function LandingPage() {
@@ -32,13 +33,25 @@ export default function LandingPage() {
             <img className="auth-form-logo" src="/vakify-logo.svg" alt="Vakify logo" />
             <div>
               <h3 className="mb-1">Start Learning Smarter</h3>
-              <p className="text-muted mb-0">Choose separate login by role.</p>
+              <p className="text-muted mb-0">Sign in with Clerk to continue.</p>
             </div>
           </div>
           <div className="d-grid gap-2">
-            <Link to="/register" className="btn brand-btn">Create Account</Link>
-            <Link to="/user-login" className="btn surface-btn">User Login</Link>
-            <Link to="/admin-login" className="btn surface-btn">Admin Login</Link>
+            <Show when="signed-out">
+              <SignUpButton mode="modal">
+                <button className="btn brand-btn" type="button">Create Account</button>
+              </SignUpButton>
+              <SignInButton mode="modal">
+                <button className="btn surface-btn" type="button">Sign In</button>
+              </SignInButton>
+            </Show>
+            <Show when="signed-in">
+              <div className="d-flex justify-content-between align-items-center p-2 border rounded-3">
+                <span className="text-muted small">Signed in</span>
+                <UserButton />
+              </div>
+            </Show>
+            <Link to="/user-login" className="btn surface-btn">Legacy Login</Link>
           </div>
         </section>
       </div>
