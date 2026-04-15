@@ -13,6 +13,13 @@ export default function DashboardPage() {
   const [practiceRows, setPracticeRows] = useState([]);
   const [insights, setInsights] = useState(null);
   const [downloadError, setDownloadError] = useState("");
+  const [todayTasks, setTodayTasks] = useState([]);
+  const [weeklyQuiz, setWeeklyQuiz] = useState(null);
+  const [quizStats, setQuizStats] = useState({ attempts: 0, best_score: 0 });
+  const [rewards, setRewards] = useState(null);
+  const [leaderboard, setLeaderboard] = useState([]);
+  const [leaderboardMe, setLeaderboardMe] = useState(null);
+  const [taskActionLoading, setTaskActionLoading] = useState(null);
 
   useEffect(() => {
     api.get("/style/mine").then((res) => {
@@ -28,11 +35,28 @@ export default function DashboardPage() {
       api.get("/chat/history"),
       api.get("/practice/mine"),
       api.get("/dashboard/insights"),
-    ]).then(([d, c, p, i]) => {
+      api.get("/tasks/today"),
+      api.get("/quiz/weekly"),
+      api.get("/rewards/summary"),
+      api.get("/leaderboard?scope=weekly"),
+    ]).then(([d, c, p, i, t, q, r, l]) => {
       if (d.status === "fulfilled") setDownloads(d.value.data || []);
       if (c.status === "fulfilled") setChatHistory(c.value.data || []);
       if (p.status === "fulfilled") setPracticeRows(p.value.data || []);
       if (i.status === "fulfilled") setInsights(i.value.data || null);
+      if (t.status === "fulfilled") setTodayTasks(t.value.data?.tasks || []);
+      if (q.status === "fulfilled") {
+        setWeeklyQuiz(q.value.data?.quiz || null);
+        setQuizStats({
+          attempts: q.value.data?.attempts || 0,
+          best_score: q.value.data?.best_score || 0,
+        });
+      }
+      if (r.status === "fulfilled") setRewards(r.value.data || null);
+      if (l.status === "fulfilled") {
+        setLeaderboard(l.value.data?.rows || []);
+        setLeaderboardMe(l.value.data?.me || null);
+      }
     });
   }, [navigate]);
 
@@ -78,6 +102,32 @@ export default function DashboardPage() {
 
   const latestQuestion = chatHistory[0]?.question || "No question yet";
   const suggestedTopic = insights?.recommended_topic || "Object-oriented programming";
+  const displayStreak = rewards?.streak?.current_streak ?? streakDays;
+
+  const refreshProgressData = async () => {
+    const [tasksRes, rewardsRes, boardRes] = await Promise.all([
+      api.get("/tasks/today"),
+      api.get("/rewards/summary"),
+      api.get("/leaderboard?scope=weekly"),
+    ]);
+    setTodayTasks(tasksRes.data?.tasks || []);
+    setRewards(rewardsRes.data || null);
+    setLeaderboard(boardRes.data?.rows || []);
+    setLeaderboardMe(boardRes.data?.me || null);
+  };
+
+  const completeTask = async (taskId) => {
+    setTaskActionLoading(taskId);
+    try {
+      await api.post(`/tasks/${taskId}/submit`, {
+        submission: "Completed from dashboard quick action",
+        score: 100,
+      });
+      await refreshProgressData();
+    } finally {
+      setTaskActionLoading(null);
+    }
+  };
 
   return (
     <>
@@ -114,8 +164,98 @@ export default function DashboardPage() {
           <article className="db2-kpi">
             <p>Mastery</p>
             <h3>{masteryScore}%</h3>
-            <span>Streak {streakDays} days</span>
+            <span>Streak {displayStreak} days</span>
           </article>
+        </section>
+
+        <section className="row g-3 mb-3">
+          <div className="col-xl-6">
+            <div className="db2-panel h-100">
+              <div className="d-flex justify-content-between align-items-center mb-3">
+                <h5 className="mb-0">Today's Tasks</h5>
+                <span className="db2-pill">{todayTasks.length} items</span>
+              </div>
+              {todayTasks.length === 0 ? (
+                <p className="text-muted mb-0">No task generated yet.</p>
+              ) : (
+                <div className="d-grid gap-2">
+                  {todayTasks.map((task) => (
+                    <div key={task.task_id} className="border rounded-3 p-2">
+                      <div className="d-flex justify-content-between align-items-start gap-2">
+                        <div>
+                          <strong>{task.title}</strong>
+                          <p className="mb-1 text-muted small">{task.description}</p>
+                          <small>Type: {task.task_type} | Difficulty: {task.difficulty} | XP: {task.points_reward}</small>
+                        </div>
+                        {task.status === "completed" ? (
+                          <span className="badge text-bg-success">Done</span>
+                        ) : (
+                          <button
+                            className="btn btn-sm brand-btn"
+                            onClick={() => completeTask(task.task_id)}
+                            disabled={taskActionLoading === task.task_id}
+                          >
+                            {taskActionLoading === task.task_id ? "Saving..." : "Mark Complete"}
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+
+          <div className="col-xl-6">
+            <div className="db2-panel h-100">
+              <h5 className="mb-3">Weekly Quiz</h5>
+              {!weeklyQuiz ? (
+                <p className="text-muted mb-0">Quiz not generated yet.</p>
+              ) : (
+                <>
+                  <p className="mb-1"><strong>{weeklyQuiz.title}</strong></p>
+                  <p className="mb-1 text-muted">Difficulty: {weeklyQuiz.difficulty}</p>
+                  <p className="mb-1 text-muted">Questions: {(weeklyQuiz.questions || []).length}</p>
+                  <p className="mb-1 text-muted">Attempts: {quizStats.attempts}</p>
+                  <p className="mb-3 text-muted">Best Score: {quizStats.best_score}%</p>
+                  <small className="text-muted d-block">Quiz window: {weeklyQuiz.week_start} to {weeklyQuiz.week_end}</small>
+                </>
+              )}
+            </div>
+          </div>
+        </section>
+
+        <section className="row g-3 mb-3">
+          <div className="col-xl-6">
+            <div className="db2-panel h-100">
+              <h5 className="mb-3">Rewards Summary</h5>
+              <p className="mb-1"><strong>XP:</strong> {rewards?.wallet?.current_xp ?? 0}</p>
+              <p className="mb-1"><strong>Level:</strong> {rewards?.wallet?.level ?? 1}</p>
+              <p className="mb-1"><strong>Reward Points:</strong> {rewards?.wallet?.reward_points ?? 0}</p>
+              <p className="mb-0"><strong>Current Streak:</strong> {rewards?.streak?.current_streak ?? 0} days</p>
+            </div>
+          </div>
+
+          <div className="col-xl-6">
+            <div className="db2-panel h-100">
+              <h5 className="mb-3">Weekly Leaderboard</h5>
+              {leaderboard.length === 0 ? (
+                <p className="text-muted mb-2">No entries yet.</p>
+              ) : (
+                <div className="d-grid gap-1 mb-2">
+                  {leaderboard.slice(0, 5).map((row) => (
+                    <div key={row.user_id} className="d-flex justify-content-between">
+                      <span>#{row.rank} {row.name}</span>
+                      <strong>{row.score} XP</strong>
+                    </div>
+                  ))}
+                </div>
+              )}
+              <small className="text-muted">
+                Your rank: {leaderboardMe?.rank || "Not ranked yet"} | Score: {leaderboardMe?.score || 0}
+              </small>
+            </div>
+          </div>
         </section>
 
         <section className="row g-3 mb-3">
