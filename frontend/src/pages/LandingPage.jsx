@@ -7,19 +7,20 @@ export default function LandingPage() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    document.body.classList.remove("auth-body");
-    return () => {};
-  }, []);
-
-  useEffect(() => {
     if (isLoaded && isSignedIn) {
       navigate("/dashboard", { replace: true });
     }
   }, [isLoaded, isSignedIn, navigate]);
 
   return (
-    <div className="container py-5 d-flex justify-content-center">
-      <SignIn />
+    <div className="auth-wrap">
+      <div className="auth-hero">
+        <h1>Vakify.Ai</h1>
+        <p>Learn, practice, compete, and improve every day with an AI-first workflow.</p>
+      </div>
+      <div className="auth-card">
+        <SignIn />
+      </div>
     </div>
   );
 }
