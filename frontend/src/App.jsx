@@ -8,6 +8,8 @@ import LearningStylePage from "./pages/LearningStylePage";
 import TasksPage from "./pages/TasksPage";
 import RewardsPage from "./pages/RewardsPage";
 import ContactPage from "./pages/ContactPage";
+import InsightsPage from "./pages/InsightsPage";
+import AdminPage from "./pages/AdminPage";
 
 export default function App() {
   return (
@@ -68,10 +70,26 @@ export default function App() {
         }
       />
       <Route
+        path="/insights"
+        element={
+          <ProtectedRoute userOnly>
+            <InsightsPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
         path="/contact"
         element={
           <ProtectedRoute userOnly>
             <ContactPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin"
+        element={
+          <ProtectedRoute adminOnly>
+            <AdminPage />
           </ProtectedRoute>
         }
       />

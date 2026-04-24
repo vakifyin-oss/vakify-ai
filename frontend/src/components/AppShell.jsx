@@ -8,6 +8,7 @@ const NAV_ITEMS = [
   { to: "/tasks", label: "Daily Tasks" },
   { to: "/practice", label: "Lab" },
   { to: "/rewards", label: "Rewards" },
+  { to: "/insights", label: "Insights" },
   { to: "/style", label: "Learning Style" },
   { to: "/contact", label: "Contact" },
 ];
@@ -36,6 +37,14 @@ export default function AppShell({ title, subtitle, children }) {
               {item.label}
             </NavLink>
           ))}
+          {user?.is_admin && (
+            <NavLink
+              to="/admin"
+              className={({ isActive }) => `side-link ${isActive ? "active" : ""}`}
+            >
+              Admin Control
+            </NavLink>
+          )}
         </nav>
 
         <button className="outline-btn sidebar-logout" onClick={logout} type="button">
